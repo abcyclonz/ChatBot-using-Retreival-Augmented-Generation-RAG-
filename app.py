@@ -29,7 +29,7 @@ def get_hf_embeddings(texts):
     return embeddings
 
 # Load and split the PDF
-loader = PyPDFLoader('itact1.pdf')
+loader = PyPDFLoader('sample1.pdf')
 pages = loader.load_and_split()
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=200)
