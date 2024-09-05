@@ -139,7 +139,7 @@ if user_query is not None and user_query != "":
 
     # Print debug information
     # print_vector_store()
-    # print_chunks()
+     print_chunks()
     print_retrieved_data(user_query)
 
 # Tests
