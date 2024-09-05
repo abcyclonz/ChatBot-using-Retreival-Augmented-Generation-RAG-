@@ -28,7 +28,7 @@ def get_hf_embeddings(texts):
     embeddings = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
     return embeddings
 
-# Load 
+# Load and split the PDF
 loader = PyPDFLoader('itact1.pdf')
 pages = loader.load_and_split()
 
@@ -52,16 +52,25 @@ def retrieve_faiss(query, index, chunks):
 
 # Prompt template
 template = """
-You must answer the question using only the provided context. 
-If the answer is not found in the context, respond with: "Can't answer, Question is out of context."
+You are an expert assistant. Given the context provided below, your task is to answer the user's question in a concise, clear, and accurate manner. 
+You must ONLY use the information in the context to answer the question. If the answer is not found in the context, explicitly state: "Can't answer, Question is out of context."
 
-Context:
+Follow these instructions:
+- Analyze the user's question carefully.
+- Identify the key information from the context that answers the question.
+- If multiple pieces of information are relevant, combine them logically to formulate your answer.
+- Avoid guessing or providing information that is not explicitly present in the context.
+
+====================
+CONTEXT:
 {context}
 
-Question:
+====================
+USER QUESTION:
 {question}
 
-Answer:
+====================
+ANSWER:
 """
 prompt = PromptTemplate.from_template(template)
 
@@ -69,13 +78,16 @@ prompt = PromptTemplate.from_template(template)
 def generate_response(question: str) -> str:
     indices, context = retrieve_faiss(question, index, chunks)
     context_text = "\n".join(context)
+    print(context_text)
     prompt_text = prompt.format(context=context_text, question=question)
+    print(prompt_text)
     
     response = model(prompt_text)
+    print(response)
+    
     parsed_response = parser.parse(response)
 
     return parsed_response
-
 
 # Print vector store
 def print_vector_store():
@@ -126,8 +138,8 @@ if user_query is not None and user_query != "":
     st.session_state.chat_history.append(AIMessage(response))
 
     # Print debug information
-    print_vector_store()
-    print_chunks()
+    # print_vector_store()
+    # print_chunks()
     print_retrieved_data(user_query)
 
 # Tests
